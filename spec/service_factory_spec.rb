@@ -45,8 +45,9 @@ describe ServiceFactory do
 
   it "ignores data from another environment" do
     ServiceFactory.register do |i|
+      sample_var { "test1" }
       env :production, :development do
-        sampleVar { "test2" }
+        sample_var { "test2" }
       end
     end
     ServiceFactory.sample_var.should_not == "test2"
