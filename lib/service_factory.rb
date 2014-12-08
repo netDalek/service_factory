@@ -37,8 +37,6 @@ module ServiceFactory
       else
         @blocks[m] = prepared_block
       end
-    rescue UnexpectedParams
-      super
     end
 
     def args_to_block(args, &block)
@@ -48,7 +46,7 @@ module ServiceFactory
         cl = args.first
         Proc.new { |*class_args| cl.new(*class_args) }
       else
-        raise UnexpectedParams
+        raise UnexpectedParams.new("expected class or block")
       end
     end
 
