@@ -1,30 +1,24 @@
 require "service_factory/version"
 
 module ServiceFactory
+  @blocks = {}
   def register(&block)
-    @factory = Builder.new.build(&block)
+    @blocks = Builder.new.build(&block)
   end
   module_function :register
 
   def self.method_missing(m, *args)
-    if @factory.memoized_values.include?(m)
-      @factory.memoized_values[m]
-    elsif @factory.blocks.include?(m)
-      @factory.blocks[m].call(*args)
+    if @blocks.include?(m)
+      @blocks[m].call(*args)
     else
       super
     end
   end
 
-  class FactoryInstance
-    attr_reader :blocks, :memoized_values
-    def initialize(blocks, memoized_values)
-      @blocks = blocks
-      @memoized_values = memoized_values
-    end
-  end
-
   class Builder
+    class Error < RuntimeError; end
+    class UnexpectedParams < Error; end
+
     def initialize
       @blocks = {}
       @memoized_values = {}
@@ -33,33 +27,28 @@ module ServiceFactory
 
     def build(&block)
       instance_eval(&block)
-      FactoryInstance.new(@blocks, @memoized_values)
+      @blocks
     end
 
     def method_missing(m, *args, &block)
+      prepared_block = args_to_block(args, &block)
+      if @memoization
+        @blocks[m] = Proc.new { @memoized_values[m] ||= prepared_block.call }
+      else
+        @blocks[m] = prepared_block
+      end
+    rescue UnexpectedParams
+      super
+    end
+
+    def args_to_block(args, &block)
       if block_given?
-        define_from_block(m, args, &block)
+        block
       elsif args.first.is_a?(Class)
         cl = args.first
-        define_from_class(m, cl, &block)
+        Proc.new { |*class_args| cl.new(*class_args) }
       else
-        super
-      end
-    end
-
-    def define_from_block(m, args, &block)
-      if @memoization
-        @memoized_values[m] = block.call
-      else
-        @blocks[m] = block
-      end
-    end
-
-    def define_from_class(m, cl, &block)
-      if @memoization
-        @memoized_values[m] = cl.new
-      else
-        @blocks[m] = Proc.new { |*class_args| cl.new(*class_args) }
+        raise UnexpectedParams
       end
     end
 
