@@ -30,6 +30,11 @@ ServiceFactory.register do
   env :test, :development do
     user_info Fake::UserInfo
   end
+
+  memoize do
+    memoized_info { costly_operation }
+    memoized_class BigFatClass
+  end
 end
 ```
 
@@ -38,6 +43,7 @@ end
 ```ruby
 ServiceFactory.user_info("John Dou") #Same as UserInfo.new("John Dou") or Fake::UserInfo.new("John Dou")
 ServiceFactory.remote_data_service("http://service.com") #Same as RemoteData.new("http://service.com")
+ServiceFactory.memoized_info #Runs only once
 ```
 
 See spec/service_factory_spec.rb for the full list of features
