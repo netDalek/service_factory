@@ -3,7 +3,7 @@ require "service_factory/version"
 module ServiceFactory
   @blocks = {}
   def register(&block)
-    @blocks = Builder.new.build(&block)
+    Builder.new(@blocks).build(&block)
   end
   module_function :register
 
@@ -19,8 +19,8 @@ module ServiceFactory
     class Error < RuntimeError; end
     class UnexpectedParams < Error; end
 
-    def initialize
-      @blocks = {}
+    def initialize(blocks)
+      @blocks = blocks
       @memoized_values = {}
       @memoization = false
     end
