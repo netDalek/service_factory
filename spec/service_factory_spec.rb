@@ -67,6 +67,19 @@ describe ServiceFactory do
     end
   end
 
+  context 'when register is called twice' do
+    before do
+      ServiceFactory.register do |i|
+        sample_var_double String
+      end
+    end
+
+    it 'should answer to all defined methods' do
+      expect(ServiceFactory.sample_var).to eq("")
+      expect(ServiceFactory.sample_var_double).to eq("")
+    end
+  end
+
   it "uses current environment data" do
     ServiceFactory.register do |i|
       env :development, :test do
