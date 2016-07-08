@@ -98,4 +98,12 @@ describe ServiceFactory do
     end
     expect(ServiceFactory.sample_var).not_to eq("test2")
   end
+
+  it "responds to method name" do
+    ServiceFactory.register do
+      sample_var { "test" }
+    end
+    expect(ServiceFactory.respond_to?(:sample_var)).to be_truthy
+    expect(ServiceFactory.public_method_defined?(:sample_var)).to be_truthy
+  end
 end
