@@ -7,12 +7,21 @@ module ServiceFactory
   end
   module_function :register
 
-  def self.method_missing(m, *args)
-    if @blocks.include?(m)
-      @blocks[m].call(*args)
-    else
-      super
+  class << self
+
+    def method_missing(m, *args)
+      if @blocks.include?(m)
+        @blocks[m].call(*args)
+      else
+        super
+      end
     end
+
+    def respond_to?(m)
+      @blocks.include?(m) || super(m)
+    end
+    alias public_method_defined? respond_to?
+
   end
 
   class Builder
