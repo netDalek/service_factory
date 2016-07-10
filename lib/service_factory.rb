@@ -17,10 +17,13 @@ module ServiceFactory
       end
     end
 
-    def respond_to?(m)
+    def respond_to?(m, include_all=false)
       @blocks.include?(m) || super(m)
     end
-    alias public_method_defined? respond_to?
+
+    def public_method_defined?(m)
+      respond_to?(m)
+    end
 
   end
 
