@@ -63,7 +63,8 @@ module ServiceFactory
     end
 
     def env(*environments, &block)
-      if environments.map{|e| e.to_s}.include?(Rails.env)
+      e = defined?(Rails) ? Rails.env : (ENV['RAILS_ENV'] || ENV['RACK_ENV'])
+      if environments.map{|e| e.to_s}.include?(e)
         instance_eval(&block)
       end
     end
